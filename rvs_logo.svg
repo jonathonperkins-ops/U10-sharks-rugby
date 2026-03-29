@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 490 385" width="490" height="385">
+  <rect width="490" height="385" fill="#262161"/>
+  <!-- 4 waves (Y=yellow, R=red) flowing left-to-right with S-curve, top to bottom: Y R Y R -->
+  <!-- Wave 1 - yellow (top) -->
+  <path d="M -10 95 C 60 30, 180 30, 245 90 S 430 155, 500 90"
+    fill="none" stroke="#f5db0b" stroke-width="26" stroke-linecap="round"/>
+  <!-- Wave 2 - red -->
+  <path d="M -10 135 C 60 70, 180 70, 245 130 S 430 195, 500 130"
+    fill="none" stroke="#b82130" stroke-width="20" stroke-linecap="round"/>
+  <!-- Wave 3 - yellow -->
+  <path d="M -10 175 C 60 110, 180 110, 245 170 S 430 235, 500 170"
+    fill="none" stroke="#f5db0b" stroke-width="26" stroke-linecap="round"/>
+  <!-- Wave 4 - red (bottom) -->
+  <path d="M -10 215 C 60 150, 180 150, 245 210 S 430 275, 500 210"
+    fill="none" stroke="#b82130" stroke-width="20" stroke-linecap="round"/>
+  <!-- BULIMBA -->
+  <text x="245" y="305"
+    fill="#f5db0b"
+    font-family="'Arial Black','Impact',sans-serif"
+    font-weight="900"
+    font-size="88"
+    text-anchor="middle"
+    letter-spacing="2">BULIMBA</text>
+  <!-- RIVERSIDE RUGBY -->
+  <text x="245" y="368"
+    fill="#f5db0b"
+    font-family="'Arial Black','Impact',sans-serif"
+    font-weight="900"
+    font-size="50"
+    text-anchor="middle"
+    letter-spacing="1">RIVERSIDE RUGBY</text>
+</svg>
