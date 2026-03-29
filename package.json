@@ -1,0 +1,12 @@
+{
+  "name": "u10-sharks-rugby",
+  "version": "1.0.0",
+  "description": "U10 Whitetip Sharks rugby team management app",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
