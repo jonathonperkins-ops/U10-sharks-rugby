@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 490 385" width="490" height="385">
+  <rect width="490" height="385" fill="#262161"/>
+  <!-- Yellow wave 1 (top) -->
+  <path d="M -5 148 C 80 62, 360 55, 495 138" fill="none" stroke="#f5db0b" stroke-width="33" stroke-linecap="round"/>
+  <!-- Red wave 2 -->
+  <path d="M -5 188 C 80 102, 360 95, 495 178" fill="none" stroke="#b82130" stroke-width="26" stroke-linecap="round"/>
+  <!-- Yellow wave 3 -->
+  <path d="M -5 224 C 80 138, 360 131, 495 214" fill="none" stroke="#f5db0b" stroke-width="33" stroke-linecap="round"/>
+  <!-- Red wave 4 (bottom) -->
+  <path d="M -5 264 C 80 178, 360 171, 495 254" fill="none" stroke="#b82130" stroke-width="26" stroke-linecap="round"/>
+  <!-- BULIMBA -->
+  <text x="245" y="315"
+    fill="#f5db0b"
+    font-family="'Arial Black','Impact',sans-serif"
+    font-weight="900"
+    font-size="82"
+    text-anchor="middle"
+    letter-spacing="3">BULIMBA</text>
+  <!-- RIVERSIDE RUGBY -->
+  <text x="245" y="373"
+    fill="#f5db0b"
+    font-family="'Arial Black','Impact',sans-serif"
+    font-weight="900"
+    font-size="48"
+    text-anchor="middle"
+    letter-spacing="2">RIVERSIDE RUGBY</text>
+</svg>
