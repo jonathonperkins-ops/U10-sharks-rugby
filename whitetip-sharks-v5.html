@@ -528,18 +528,26 @@ function load(){
     return migrate(JSON.parse(r));
   }catch(e){return blankState()}
 }
+// Debounced, cancellable server save to avoid older requests overwriting newer state
+let saveTimeout=null;
+let saveController=null;
 function sv(){
   try{localStorage.setItem(SK,JSON.stringify(S))}catch(e){}
-  fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(S)}).catch(()=>{});
+  if(saveTimeout!==null){clearTimeout(saveTimeout);saveTimeout=null;}
+  if(saveController){saveController.abort();saveController=null;}
+  saveTimeout=setTimeout(()=>{
+    saveTimeout=null;
+    try{
+      saveController=new AbortController();
+      fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(S),signal:saveController.signal}).catch(()=>{}).finally(()=>{saveController=null;});
+    }catch(e){saveController=null;}
+  },200);
 }
 
 let S=load();
-// Working week stats
+// Working week stats — initialised by initWK() (hoisted function declaration below)
 let WK={};
-PLAYERS.forEach(p=>{WK[p.id]={tries:0,tackles:0,goals:0,yc:0,rc:0,mins:35}});
-if(S.wk&&Object.keys(S.wk).length){
-  PLAYERS.forEach(p=>{if(S.wk[p.id])WK[p.id]={...WK[p.id],...S.wk[p.id]}});
-}
+initWK();
 
 // ══════════════════════════════════════════
 // UTILS
