@@ -1,27 +1,32 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 490 385" width="490" height="385">
   <rect width="490" height="385" fill="#262161"/>
-  <!-- Yellow wave 1 (top) -->
-  <path d="M -5 148 C 80 62, 360 55, 495 138" fill="none" stroke="#f5db0b" stroke-width="33" stroke-linecap="round"/>
-  <!-- Red wave 2 -->
-  <path d="M -5 188 C 80 102, 360 95, 495 178" fill="none" stroke="#b82130" stroke-width="26" stroke-linecap="round"/>
-  <!-- Yellow wave 3 -->
-  <path d="M -5 224 C 80 138, 360 131, 495 214" fill="none" stroke="#f5db0b" stroke-width="33" stroke-linecap="round"/>
-  <!-- Red wave 4 (bottom) -->
-  <path d="M -5 264 C 80 178, 360 171, 495 254" fill="none" stroke="#b82130" stroke-width="26" stroke-linecap="round"/>
+  <!-- 4 waves (Y=yellow, R=red) flowing left-to-right with S-curve, top to bottom: Y R Y R -->
+  <!-- Wave 1 - yellow (top) -->
+  <path d="M -10 95 C 60 30, 180 30, 245 90 S 430 155, 500 90"
+    fill="none" stroke="#f5db0b" stroke-width="26" stroke-linecap="round"/>
+  <!-- Wave 2 - red -->
+  <path d="M -10 135 C 60 70, 180 70, 245 130 S 430 195, 500 130"
+    fill="none" stroke="#b82130" stroke-width="20" stroke-linecap="round"/>
+  <!-- Wave 3 - yellow -->
+  <path d="M -10 175 C 60 110, 180 110, 245 170 S 430 235, 500 170"
+    fill="none" stroke="#f5db0b" stroke-width="26" stroke-linecap="round"/>
+  <!-- Wave 4 - red (bottom) -->
+  <path d="M -10 215 C 60 150, 180 150, 245 210 S 430 275, 500 210"
+    fill="none" stroke="#b82130" stroke-width="20" stroke-linecap="round"/>
   <!-- BULIMBA -->
-  <text x="245" y="315"
+  <text x="245" y="305"
     fill="#f5db0b"
     font-family="'Arial Black','Impact',sans-serif"
     font-weight="900"
-    font-size="82"
+    font-size="88"
     text-anchor="middle"
-    letter-spacing="3">BULIMBA</text>
+    letter-spacing="2">BULIMBA</text>
   <!-- RIVERSIDE RUGBY -->
-  <text x="245" y="373"
+  <text x="245" y="368"
     fill="#f5db0b"
     font-family="'Arial Black','Impact',sans-serif"
     font-weight="900"
-    font-size="48"
+    font-size="50"
     text-anchor="middle"
-    letter-spacing="2">RIVERSIDE RUGBY</text>
+    letter-spacing="1">RIVERSIDE RUGBY</text>
 </svg>
