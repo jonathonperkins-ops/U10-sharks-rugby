@@ -490,6 +490,7 @@ const POS_OPTS=[
 const posGrp=v=>v?POS_OPTS.find(o=>o.v===v)?.grp||'':'';
 
 const SK='sharks_u10_v5';
+const API_URL='/api/data';
 
 function blankState(){
   const av={},st={},ph={},prefs={};
@@ -503,11 +504,7 @@ function blankState(){
     match:{week:1,date:'',time:'',opp:'',ground:''},
     opp:{tries:0,goals:0},swaps:{h1:[],h2:[]},wk:{}};
 }
-function load(){
-  try{
-    const r=localStorage.getItem(SK);
-    if(!r)return blankState();
-    const s=JSON.parse(r);
+function migrate(s){
     PLAYERS.forEach(p=>{
       if(!s.st[p.id])s.st[p.id]={tries:0,tackles:0,motm:0,tp:0,games:0,starts:0,caps:0,fruit:0,yc:0,rc:0,mins:0};
       if(!s.st[p.id].hasOwnProperty('starts'))s.st[p.id].starts=0;
@@ -523,17 +520,34 @@ function load(){
     // Always recalculate cap/fruit on load — never trust stale saved values
     s.capId=null;s.fruitId=null;
     return s;
+}
+function load(){
+  try{
+    const r=localStorage.getItem(SK);
+    if(!r)return blankState();
+    return migrate(JSON.parse(r));
   }catch(e){return blankState()}
 }
-function sv(){try{localStorage.setItem(SK,JSON.stringify(S))}catch(e){}}
+// Debounced, cancellable server save to avoid older requests overwriting newer state
+let saveTimeout=null;
+let saveController=null;
+function sv(){
+  try{localStorage.setItem(SK,JSON.stringify(S))}catch(e){}
+  if(saveTimeout!==null){clearTimeout(saveTimeout);saveTimeout=null;}
+  if(saveController){saveController.abort();saveController=null;}
+  saveTimeout=setTimeout(()=>{
+    saveTimeout=null;
+    try{
+      saveController=new AbortController();
+      fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(S),signal:saveController.signal}).catch(()=>{}).finally(()=>{saveController=null;});
+    }catch(e){saveController=null;}
+  },200);
+}
 
 let S=load();
-// Working week stats
+// Working week stats — initialised by initWK() (hoisted function declaration below)
 let WK={};
-PLAYERS.forEach(p=>{WK[p.id]={tries:0,tackles:0,goals:0,yc:0,rc:0,mins:35}});
-if(S.wk&&Object.keys(S.wk).length){
-  PLAYERS.forEach(p=>{if(S.wk[p.id])WK[p.id]={...WK[p.id],...S.wk[p.id]}});
-}
+initWK();
 
 // ══════════════════════════════════════════
 // UTILS
@@ -1426,17 +1440,47 @@ function genPDF(){
 // RESET
 // ══════════════════════════════════════════
 function confirmReset(){
-  if(confirm('⚠️ Delete ALL season data?')){localStorage.removeItem(SK);location.reload()}
+  if(confirm('⚠️ Delete ALL season data?')){
+    localStorage.removeItem(SK);
+    fetch(API_URL,{method:'DELETE'}).catch(()=>{}).finally(()=>{location.reload()});
+  }
 }
 
 // ══════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════
-loadMatch();
-renderAvail();
-renderPrefs();
-updateGDHeader();
-document.getElementById('hdrWeek').textContent='WEEK '+(S.match?.week||S.week||1);
+function initWK(){
+  WK={};
+  PLAYERS.forEach(p=>{WK[p.id]={tries:0,tackles:0,goals:0,yc:0,rc:0,mins:35}});
+  if(S.wk&&Object.keys(S.wk).length){
+    PLAYERS.forEach(p=>{if(S.wk[p.id])WK[p.id]={...WK[p.id],...S.wk[p.id]}});
+  }
+}
+function renderAll(){
+  loadMatch();renderAvail();renderPrefs();updateGDHeader();
+  document.getElementById('hdrWeek').textContent='WEEK '+(S.match?.week||S.week||1);
+}
+async function init(){
+  renderAll();
+  try{
+    const res=await fetch(API_URL);
+    if(!res.ok)throw new Error('Server error');
+    const serverData=await res.json();
+    const serverEmpty=!serverData||Object.keys(serverData).length===0;
+    const localRaw=localStorage.getItem(SK);
+    if(!serverEmpty){
+      // Server is source of truth — override cache
+      S=migrate(serverData);
+      try{localStorage.setItem(SK,JSON.stringify(S))}catch(e){}
+      initWK();renderAll();
+    }else if(localRaw){
+      // First-time migration: promote localStorage to server
+      sv();
+    }
+    // Both empty → stay in blank state
+  }catch(e){/* server unavailable — localStorage cache continues as-is */}
+}
+init();
 </script>
 </body>
 </html>
