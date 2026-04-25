@@ -1,12 +1,20 @@
 {
   "name": "u10-sharks-rugby",
-  "version": "1.0.0",
-  "description": "U10 Whitetip Sharks rugby team management app",
-  "main": "server.js",
+  "version": "2.0.0",
+  "description": "U10 Whitetip Sharks rugby team management app (Firebase Hosting + Firestore).",
+  "private": true,
   "scripts": {
-    "start": "node server.js"
+    "deploy": "firebase deploy --only hosting,firestore:rules",
+    "deploy:hosting": "firebase deploy --only hosting",
+    "deploy:rules": "firebase deploy --only firestore:rules",
+    "emulate": "firebase emulators:start",
+    "seed": "node scripts/seed.mjs"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "firebase-admin": "^13.8.0",
+    "firebase-tools": "^15.15.0"
   }
 }

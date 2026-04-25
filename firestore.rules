@@ -1,0 +1,44 @@
+rules_version = '2';
+
+// Spark-plan setup (no Cloud Functions). The coach passphrase lives as a
+// hardcoded string in this rules file (server-side only — clients never see
+// the rules source). To rotate it, edit COACH_KEY below and run
+//   firebase deploy --only firestore:rules
+// On every write the client must echo the same value as the `_coachKey`
+// field on the document.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Season document — single doc holds entire S state.
+    match /sharks/{seasonId} {
+      allow read: if request.auth != null;
+
+      allow write: if request.auth != null
+                   && coachKeyOk(request.resource.data)
+                   && versionMonotonic(request.resource.data, resource);
+    }
+
+    // Default deny.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+
+  // ROTATE THIS to change the team passphrase, then redeploy rules.
+  function coachKey() {
+    return 'rvsjptb2016';
+  }
+
+  function coachKeyOk(incoming) {
+    return incoming.keys().hasAny(['_coachKey'])
+        && incoming._coachKey is string
+        && incoming._coachKey == coachKey();
+  }
+
+  function versionMonotonic(incoming, existing) {
+    return incoming.keys().hasAll(['_version'])
+        && incoming._version is int
+        && (existing == null || incoming._version > existing.data._version);
+  }
+}

@@ -1,2 +1,4 @@
 data/session.json
 node_modules/
+.claude*
+

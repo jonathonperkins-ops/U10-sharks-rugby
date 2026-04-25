@@ -30,6 +30,11 @@ header{background:linear-gradient(135deg,var(--M),#1a1840);border-bottom:3px sol
 .tab:hover{color:var(--T)}.tab.active{color:var(--G);border-bottom-color:var(--G)}
 main{padding:12px;max-width:960px;margin:0 auto}
 .panel{display:none}.panel.active{display:block}
+body:not(.coach-mode) .coach-only{display:none !important}
+summary.card-title{cursor:pointer;list-style:none;display:flex;align-items:center;gap:6px}
+summary.card-title::-webkit-details-marker{display:none}
+summary.card-title::after{content:'▾';margin-left:auto;color:var(--MU);transition:transform .15s}
+details:not([open]) summary.card-title::after{transform:rotate(-90deg)}
 .card{background:var(--C);border:1px solid var(--B);border-radius:8px;padding:14px;margin-bottom:11px}
 .card-title{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:17px;color:var(--G);
   margin-bottom:10px;display:flex;align-items:center;gap:6px}
@@ -114,7 +119,12 @@ main{padding:12px;max-width:960px;margin:0 auto}
 .ix-cols{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .ix-half{background:var(--C2);border:1px solid var(--B);border-radius:6px;padding:10px}
 .ix-title{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:13px;color:var(--G);margin-bottom:7px}
-.swap-row{display:grid;grid-template-columns:1fr 18px 1fr auto;gap:3px;align-items:center;margin-bottom:5px}
+.swap-row{display:grid;grid-template-columns:auto 1fr 18px 1fr auto;gap:6px;align-items:center;margin-bottom:5px}
+.swap-header{display:grid;grid-template-columns:auto 1fr 18px 1fr auto;gap:6px;align-items:center;
+  font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.08em;
+  color:#f5db0b;padding:0 2px 4px;border-bottom:1px solid var(--B);margin-bottom:6px}
+.swap-header .col{text-align:center;text-transform:uppercase}
+.swap-header .col.min{color:var(--MU);font-weight:700}
 .swap-sel{background:var(--D);color:var(--T);border:1px solid var(--B);border-radius:3px;
   padding:4px 5px;font-size:11px;font-family:'Barlow',sans-serif;width:100%}
 .swap-sel:focus{outline:none;border-color:var(--G)}
@@ -127,23 +137,29 @@ main{padding:12px;max-width:960px;margin:0 auto}
 .del-btn:hover{color:var(--RE)}
 
 /* PLAYER STAT ROWS */
-.psr{display:grid;grid-template-columns:1fr repeat(4,auto);gap:4px;
+.psr{display:grid;grid-template-columns:auto 1fr repeat(4,auto);gap:8px;
   align-items:center;background:var(--C2);border-radius:5px;
-  padding:6px 8px;margin-bottom:5px;border:1px solid var(--B)}
-.psrn{font-weight:600;font-size:12px}
+  padding:8px 10px;margin-bottom:6px;border:1px solid var(--B)}
+.psrn{font-weight:600;font-size:13px}
 .psub2{font-size:9px;color:var(--MU)}
+.pos-chip{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;
+  letter-spacing:.04em;background:var(--M);color:var(--G);border:1px solid var(--B);
+  border-radius:4px;padding:4px 8px;min-width:46px;text-align:center;line-height:1}
+.pos-chip.bench{background:transparent;color:var(--MU);border-color:var(--B);font-weight:700;font-size:10px}
 .scol{display:flex;align-items:center;gap:2px;flex-direction:column}
-.scol-row{display:flex;align-items:center;gap:2px}
-.slbl{font-size:8px;color:var(--MU);text-align:center;margin-top:1px;letter-spacing:.03em}
+.scol-row{display:flex;align-items:center;gap:6px}
+.slbl{font-size:9px;color:var(--MU);text-align:center;margin-top:2px;letter-spacing:.04em}
 .sb3{background:var(--D);border:1px solid var(--B);color:var(--T);
-  width:22px;height:22px;border-radius:3px;cursor:pointer;font-size:12px;
-  display:flex;align-items:center;justify-content:center;transition:all .12s;flex-shrink:0}
+  width:44px;height:44px;border-radius:8px;cursor:pointer;font-size:22px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;transition:all .12s;flex-shrink:0;
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation}
 .sb3:hover{border-color:var(--G);color:var(--G)}
+.sb3:active{transform:scale(0.92);background:var(--B)}
 .sb3.yr{border-color:var(--AM);color:var(--AM)}.sb3.rr{border-color:var(--RE);color:var(--RE)}
-.sv{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;min-width:18px;text-align:center}
+.sv{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;min-width:30px;text-align:center}
 
 /* CARDS SECTION */
-.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:5px;margin-top:4px}
+.cards-grid{display:flex;flex-direction:column;gap:5px;margin-top:8px}
 .card-row{display:flex;align-items:center;gap:6px;background:var(--C2);border-radius:4px;
   padding:5px 8px;font-size:11px;border:1px solid var(--B)}
 
@@ -204,11 +220,13 @@ main{padding:12px;max-width:960px;margin:0 auto}
 
 @media(max-width:560px){
   .ix-cols{grid-template-columns:1fr}
-  .psr{grid-template-columns:1fr repeat(3,auto)}
+  /* On phones: keep Pos chip + Player on row 1, stat columns wrap to row 2 */
+  .psr{grid-template-columns:auto 1fr;grid-auto-flow:row;gap:6px 10px}
+  .psr .scol{grid-column:span 1;justify-self:center}
   .sb .sn{font-size:36px}
   .rot-grid{grid-template-columns:1fr}
   .team-summary{grid-template-columns:1fr}
-  .swap-row{grid-template-columns:1fr 16px 1fr auto}
+  .swap-row{grid-template-columns:auto 1fr 16px 1fr auto}
 }
 </style>
 </head>
@@ -221,7 +239,7 @@ main{padding:12px;max-width:960px;margin:0 auto}
 </header>
 
 <div class="tabs">
-  <div class="tab active" onclick="ST('setup',this)">⚙️ Setup</div>
+  <div class="tab active coach-only" onclick="ST('setup',this)">⚙️ Setup</div>
   <div class="tab" onclick="ST('teamsheet',this)">🏉 Team</div>
   <div class="tab" onclick="ST('gameday',this)">🎯 Game Day</div>
   <div class="tab" onclick="ST('season',this)">🏆 Season</div>
@@ -231,7 +249,7 @@ main{padding:12px;max-width:960px;margin:0 auto}
 <main>
 
 <!-- ═══════════════ SETUP ═══════════════ -->
-<div class="panel active" id="panel-setup">
+<div class="panel active coach-only" id="panel-setup">
 
   <div class="card">
     <div class="card-title">Match Details</div>
@@ -287,12 +305,12 @@ main{padding:12px;max-width:960px;margin:0 auto}
   </div>
 
   <div class="card">
-    <div class="card-title">Starting 15 — Field View</div>
+    <div class="card-title">Starting 12 — Field View</div>
     <div id="fieldV"></div>
     <div id="benchDisplay"></div>
   </div>
 
-  <div class="card">
+  <div class="card coach-only">
     <div class="card-title">Edit Positions</div>
     <div id="posTable"></div>
     <div style="display:flex;gap:7px;margin-top:10px;flex-wrap:wrap">
@@ -302,9 +320,22 @@ main{padding:12px;max-width:960px;margin:0 auto}
     <div id="pdfMsg" style="margin-top:6px"></div>
   </div>
 
-  <div class="card">
+  <div class="card coach-only">
     <div class="card-title">🔄 Interchange Plan</div>
-    <div class="al ali" style="margin-bottom:8px">Subs are matched by position group — forwards swap with forwards, backs with backs. Edit freely below.</div>
+    <div class="al ali" style="margin-bottom:8px">Generate a clock-based plan, or edit rows directly. Subs respect position groups.</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px;font-size:12px">
+      <label>Half length
+        <input id="cfgHalfMin" type="number" min="5" max="40" step="1" value="20"
+               style="width:54px;background:var(--C2);color:var(--T);border:1px solid var(--B);border-radius:4px;padding:4px 6px;margin-left:4px">
+        min
+      </label>
+      <label>Swap every
+        <input id="cfgSwapMin" type="number" min="3" max="20" step="1" value="10"
+               style="width:54px;background:var(--C2);color:var(--T);border:1px solid var(--B);border-radius:4px;padding:4px 6px;margin-left:4px">
+        min
+      </label>
+      <button class="btn" onclick="generateSwaps()">🔄 Generate Plan</button>
+    </div>
     <div class="ix-cols">
       <div class="ix-half">
         <div class="ix-title">1st Half Swaps</div>
@@ -317,6 +348,7 @@ main{padding:12px;max-width:960px;margin:0 auto}
         <button class="add-swap" onclick="addSwap(2)">+ Add Swap</button>
       </div>
     </div>
+    <div id="swapPreview" style="margin-top:10px;font-size:11px;color:var(--MU)"></div>
     <div style="margin-top:10px">
       <button class="btn bgold" onclick="saveSwaps()">💾 Save Interchange Plan</button>
       <span id="swapSaved" style="margin-left:8px;font-size:11px;color:var(--GR)"></span>
@@ -353,6 +385,23 @@ main{padding:12px;max-width:960px;margin:0 auto}
     <div id="resultBar" class="result-bar" style="display:none"></div>
   </div>
 
+  <!-- LIVE FIELD VIEW -->
+  <div class="card">
+    <div class="card-title">⏱ Field Right Now</div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12px;margin-bottom:8px">
+      <button class="btn bgold" onclick="kickOff()">▶ Kick off</button>
+      <button class="btn" onclick="resetClock()">🔄 Reset</button>
+      <span id="liveClock" style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:18px;color:var(--G)">—</span>
+      <label style="margin-left:auto;font-size:11px;color:var(--MU)">Override min
+        <input id="overrideMin" type="number" min="0" max="80" step="1"
+               oninput="renderLiveField()"
+               style="width:54px;background:var(--C2);color:var(--T);border:1px solid var(--B);border-radius:4px;padding:4px 6px;margin-left:4px">
+      </label>
+    </div>
+    <div id="liveField"></div>
+    <div id="nextSwapHint" style="margin-top:8px;font-size:11px;color:var(--MU)"></div>
+  </div>
+
   <!-- INTERCHANGE (two columns) -->
   <div class="card">
     <div class="card-title">🔄 Interchange Plan</div>
@@ -376,9 +425,11 @@ main{padding:12px;max-width:960px;margin:0 auto}
     </div>
     <div id="playerStats"></div>
 
-    <!-- CARDS -->
-    <div class="card-title" style="margin-top:12px">Cards</div>
-    <div id="cardsSection"></div>
+    <!-- CARDS (collapsible) -->
+    <details style="margin-top:12px" open>
+      <summary class="card-title">📋 Cards (Yellow / Red)</summary>
+      <div id="cardsSection"></div>
+    </details>
 
     <!-- MoM / Team Player -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
@@ -422,11 +473,171 @@ main{padding:12px;max-width:960px;margin:0 auto}
     <div id="histList"><p class="tmu">No games saved yet.</p></div>
     <div style="margin-top:10px">
       <button class="btn bdanger" onclick="confirmReset()">⚠️ Reset All Season Data</button>
+    <button class="btn" style="margin-left:8px" onclick="enterCoachMode()">🔑 Coach mode</button>
+    <button class="btn bgold" style="margin-left:8px" onclick="saveNow()">💾 Save to cloud</button>
+    <span id="dirtyPill" style="margin-left:8px;font-size:11px;color:var(--GR)"></span>
+    <span id="coachStatus" style="margin-left:8px;font-size:11px;color:var(--GR)"></span>
+    <span id="incomingPill" style="margin-left:8px;font-size:11px;color:#f5db0b;cursor:pointer;display:none"
+          onclick="pullLatest()" title="A newer version is on the cloud — click to merge"></span>
     </div>
   </div>
 </div>
 
 </main>
+
+<!-- Firestore data layer (replaces previous /api/data fetches).
+     On Firebase Hosting, /__/firebase/init.json is auto-injected with the
+     project's web config; locally, use the emulator on localhost:8080. -->
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js';
+import { getAuth, signInAnonymously, onAuthStateChanged, connectAuthEmulator }
+  from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js';
+import { getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction,
+         serverTimestamp, connectFirestoreEmulator, enableIndexedDbPersistence }
+  from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js';
+
+const SEASON_ID  = 'season-2026';
+const META_KEYS  = ['_version','_updatedAt','_seededFrom','_coachKey'];
+const COACH_LSK  = 'sharks_u10_coach_key';
+const isLocal    = ['localhost','127.0.0.1'].includes(location.hostname);
+
+async function loadConfig() {
+  // Firebase Hosting auto-serves /__/firebase/init.json with the project config.
+  // Falls back to a stub for emulator-only local dev.
+  try {
+    const res = await fetch('/__/firebase/init.json', { cache: 'no-store' });
+    if (res.ok) return await res.json();
+  } catch (_) {}
+  return { projectId: 'demo-sharks', apiKey: 'demo', authDomain: 'demo' };
+}
+
+const ready = (async () => {
+  const cfg = await loadConfig();
+  const app = initializeApp(cfg);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  if (isLocal) {
+    connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true });
+    connectFirestoreEmulator(db, 'localhost', 8080);
+  }
+
+  try { await enableIndexedDbPersistence(db); } catch (_) { /* multi-tab or unsupported */ }
+
+  const ref = doc(db, 'sharks', SEASON_ID);
+  let unsubSnap = null;
+  let lastSeenVersion = 0;
+  const listeners = new Set();
+
+  function stripMeta(d) {
+    const out = {};
+    for (const k of Object.keys(d)) if (!META_KEYS.includes(k)) out[k] = d[k];
+    return out;
+  }
+  function emit(state, meta) { listeners.forEach(l => { try { l(state, meta); } catch(_) {} }); }
+
+  async function ensureAuth() {
+    if (auth.currentUser) return auth.currentUser;
+    return new Promise((resolve, reject) => {
+      const unsub = onAuthStateChanged(auth, u => { if (u) { unsub(); resolve(u); } });
+      signInAnonymously(auth).catch(reject);
+    });
+  }
+
+  async function load() {
+    await ensureAuth();
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return null;
+    const d = snap.data();
+    lastSeenVersion = d._version || 0;
+    return stripMeta(d);
+  }
+
+  function getCoachKey() {
+    try { return localStorage.getItem(COACH_LSK) || ''; } catch (_) { return ''; }
+  }
+
+  async function save(state) {
+    await ensureAuth();
+    const key = getCoachKey();
+    return runTransaction(db, async tx => {
+      const cur = await tx.get(ref);
+      const v = cur.exists() ? (cur.data()._version || 0) : 0;
+      tx.set(ref, {
+        ...stripMeta(state),
+        _version: v + 1,
+        _updatedAt: serverTimestamp(),
+        _coachKey: key,
+      });
+      lastSeenVersion = v + 1;
+    });
+  }
+
+  async function reset() {
+    await ensureAuth();
+    return save({});
+  }
+
+  function subscribe(cb) {
+    listeners.add(cb);
+    if (!unsubSnap) {
+      unsubSnap = onSnapshot(ref, snap => {
+        if (!snap.exists()) { emit(null, { remote: true }); return; }
+        const d = snap.data();
+        const v = d._version || 0;
+        if (v <= lastSeenVersion) return;   // skip our own committed write too
+        lastSeenVersion = v;
+        emit(stripMeta(d), {
+          remote: !snap.metadata.hasPendingWrites,
+          updatedAt: d._updatedAt && d._updatedAt.toDate ? d._updatedAt.toDate() : null,
+        });
+      }, err => console.warn('[shark] snapshot error', err));
+    }
+    return () => { listeners.delete(cb); };
+  }
+
+  // Validates the passphrase by performing a benign re-save of the current
+  // document with the candidate key. If Firestore rules accept the write the
+  // passphrase is correct and we cache it locally; if rules reject we throw
+  // a clear error. The doc's content is unchanged apart from _version bump
+  // and updated _coachKey field.
+  async function grantCoach(passphrase) {
+    await ensureAuth();
+    if (typeof passphrase !== 'string' || !passphrase) {
+      throw new Error('Empty passphrase');
+    }
+    try {
+      await runTransaction(db, async tx => {
+        const cur = await tx.get(ref);
+        const v = cur.exists() ? (cur.data()._version || 0) : 0;
+        const base = cur.exists() ? { ...cur.data() } : {};
+        delete base._coachKey; delete base._version; delete base._updatedAt;
+        tx.set(ref, {
+          ...base,
+          _version: v + 1,
+          _updatedAt: serverTimestamp(),
+          _coachKey: passphrase,
+        });
+      });
+    } catch (err) {
+      const msg = (err && (err.code || err.message)) || '';
+      if (/permission-denied/.test(msg)) throw new Error('Wrong passphrase.');
+      throw err;
+    }
+    try { localStorage.setItem(COACH_LSK, passphrase); } catch (_) {}
+    return { ok: true };
+  }
+
+  async function isCoach() {
+    return !!getCoachKey();
+  }
+
+  return { load, save, reset, subscribe, grantCoach, isCoach };
+})();
+
+window.__sharkDB = await ready;
+window.dispatchEvent(new CustomEvent('shark-db-ready'));
+</script>
 
 <script>
 // ══════════════════════════════════════════
@@ -450,9 +661,9 @@ const PLAYERS=[
   {id:15,first:'Finn',    last:'Duggan'},
   {id:16,first:'Nicholas',last:'Timms'},
   {id:17,first:'Roux',    last:'Joubert'},
-  {id:18,first:'Mason',   last:'Gosselink'},
-  {id:19,first:'Luca',    last:'Kalchis'},
-  {id:20,first:'Harvey',  last:'Mckowan'}
+  {id:18,first:'Harvey',  last:'Mckeown'},
+  {id:19,first:'Mickey',    last:'Purcell'},
+  {id:20,first:'Charlie',  last:'Hastings'}
 ];
 
 // Named positions
@@ -485,8 +696,24 @@ const POS_OPTS=[
 ];
 const posGrp=v=>v?POS_OPTS.find(o=>o.v===v)?.grp||'':'';
 
+// Map a preference value (e.g. "fwd-prop") to the POS.n slots it can fill.
+// Empty/unknown → empty array (caller treats as "no preference").
+const PREF_TO_POSNS={
+  'fwd-prop':   [1,3],
+  'fwd-hooker': [2],
+  'fwd-lock':   [4,5],
+  'fwd-n8':     [8],
+  'fwd-any':    [1,2,3,4,5,8],
+  'back-sh':    [9],
+  'back-fh':    [10],
+  'back-wing':  [11,14],
+  'back-ctr':   [12,13],
+  'back-any':   [9,10,11,12,13,14],
+};
+const eligiblePosNs=v=>PREF_TO_POSNS[v]||[];
+
 const SK='sharks_u10_v5';
-const API_URL='api/data';
+// API_URL removed — data layer now lives in window.__sharkDB (Firestore).
 
 function blankState(){
   const av={},st={},ph={},prefs={};
@@ -512,9 +739,16 @@ function migrate(s){
     });
     if(!s.opp)s.opp={tries:0,goals:0};
     if(!s.swaps)s.swaps={h1:[],h2:[]};
+    // Backwards-compat: legacy swap rows had no atMin. Default to mid-half (10').
+    ['h1','h2'].forEach(h=>{
+      (s.swaps[h]||[]).forEach(r=>{ if(typeof r.atMin!=='number')r.atMin=10; });
+    });
     if(!s.wk)s.wk={};
-    // Always recalculate cap/fruit on load — never trust stale saved values
-    s.capId=null;s.fruitId=null;
+    // Sanity: drop cap/fruit only if the referenced player isn't available.
+    // This preserves manual coach overrides across reloads.
+    if(s.capId   && !s.av[s.capId])   s.capId=null;
+    if(s.fruitId && !s.av[s.fruitId]) s.fruitId=null;
+    if(s.capId && s.fruitId && s.capId===s.fruitId) s.fruitId=null;
     return s;
 }
 function load(){
@@ -524,20 +758,19 @@ function load(){
     return migrate(JSON.parse(r));
   }catch(e){return blankState()}
 }
-// Debounced, cancellable server save to avoid older requests overwriting newer state
-let saveTimeout=null;
-let saveController=null;
+// Edits stay in localStorage immediately. The Firestore push is now manual via
+// saveNow() — it does NOT auto-fire on every change, because the snapshot
+// listener used to clobber in-flight UI state.
+let dirty=false;                     // true when localStorage is ahead of cloud
+let pendingRemote=null;              // remote state held back while user is editing
+function setDirty(b){
+  dirty=!!b;
+  const el=document.getElementById('dirtyPill');
+  if(el)el.textContent=dirty?'● Unsaved':'';
+}
 function sv(){
   try{localStorage.setItem(SK,JSON.stringify(S))}catch(e){}
-  if(saveTimeout!==null){clearTimeout(saveTimeout);saveTimeout=null;}
-  if(saveController){saveController.abort();saveController=null;}
-  saveTimeout=setTimeout(()=>{
-    saveTimeout=null;
-    try{
-      saveController=new AbortController();
-      fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(S),signal:saveController.signal}).catch(()=>{}).finally(()=>{saveController=null;});
-    }catch(e){saveController=null;}
-  },200);
+  setDirty(true);
 }
 
 let S=load();
@@ -672,34 +905,75 @@ function leastOf(list,key){
   if(!list.length)return null;
   return[...list].sort((a,b)=>{const d=S.st[a.id][key]-S.st[b.id][key];return d||a.id-b.id})[0];
 }
+
+// Pure suggestion — never mutates S.
+function suggestCapFruit(){
+  const av=avail();
+  if(!av.length)return{capId:null,fruitId:null};
+  const cap=leastOf(av,'caps');
+  const fr=leastOf(av.filter(p=>p.id!==cap.id),'fruit');
+  return{capId:cap?.id||null,fruitId:fr?.id||null};
+}
+
+// Apply the suggestion (used by 🔄 Suggest rotation button).
+function rotateCapFruit(){
+  const s=suggestCapFruit();
+  S.capId=s.capId;S.fruitId=s.fruitId;sv();renderCap();
+}
+
+function setCap(id){
+  S.capId=id?Number(id):null;
+  sv();renderCap();
+}
+function setFruit(id){
+  S.fruitId=id?Number(id):null;
+  sv();renderCap();
+}
+
 function renderCap(){
   const av=avail();
-  if(!av.length){document.getElementById('captainBox').innerHTML='<p class="tmu">No players available.</p>';return}
-  const cap=leastOf(av,'caps');
-  // Fruit must be a DIFFERENT player — exclude captain from list
-  const fruitPool=av.filter(p=>p.id!==cap.id);
-  const fr=leastOf(fruitPool,'fruit');
-  // Safety: ensure they are never the same person
-  let frFinal=fr;
-  if(fr&&fr.id===cap.id){
-    const fallback=fruitPool.filter(p=>p.id!==cap.id);
-    frFinal=leastOf(fallback,'fruit')||null;
+  const box=document.getElementById('captainBox');
+  if(!av.length){box.innerHTML='<p class="tmu">No players available.</p>';return}
+
+  // Fall back to the rotation suggestion only when nothing is set yet.
+  if(!S.capId||!S.av[S.capId]){
+    const s=suggestCapFruit();
+    if(s.capId)S.capId=s.capId;
   }
-  S.capId=cap.id;S.fruitId=frFinal?.id||null;sv();
-  document.getElementById('captainBox').innerHTML=`
+  if(!S.fruitId||!S.av[S.fruitId]){
+    const s=suggestCapFruit();
+    if(s.fruitId)S.fruitId=s.fruitId;
+  }
+
+  const cap=S.capId?byId(S.capId):null;
+  const fr =S.fruitId?byId(S.fruitId):null;
+
+  // Captain and Fruit can be the same player — same option list either way.
+  const optsFor=(currentId)=>{
+    const head=`<option value="">— None —</option>`;
+    const body=av
+      .map(p=>`<option value="${p.id}"${p.id===currentId?' selected':''}>${pn(p)}</option>`)
+      .join('');
+    return head+body;
+  };
+
+  box.innerHTML=`
     <div class="rot-grid">
       <div class="rot-box">
-        <div style="font-size:9px;color:var(--MU);letter-spacing:.1em;text-transform:uppercase;margin-bottom:2px">⭐ Captain</div>
-        <div class="rot-name">${pn(cap)}</div>
-        <div class="rot-sub">Captained ${S.st[cap.id].caps}× this season</div>
+        <div style="font-size:9px;color:var(--MU);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">⭐ Captain</div>
+        <select class="pp-sel" style="width:100%" onchange="setCap(this.value)">${optsFor(S.capId)}</select>
+        <div class="rot-sub" style="margin-top:6px">${cap?`Captained ${S.st[cap.id].caps}× this season`:'No captain set'}</div>
       </div>
       <div class="rot-box" style="border-color:var(--B)">
-        <div style="font-size:9px;color:var(--MU);letter-spacing:.1em;text-transform:uppercase;margin-bottom:2px">🍊 Fruit & Lollies</div>
-        <div class="rot-name" style="color:var(--T)">${fr?pn(fr):'—'}</div>
-        <div class="rot-sub">On duty ${fr?S.st[fr.id].fruit:0}× this season</div>
+        <div style="font-size:9px;color:var(--MU);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">🍊 Fruit & Lollies</div>
+        <select class="pp-sel" style="width:100%" onchange="setFruit(this.value)">${optsFor(S.fruitId)}</select>
+        <div class="rot-sub" style="margin-top:6px">${fr?`On duty ${S.st[fr.id].fruit}× this season`:'No fruit duty set'}</div>
       </div>
     </div>
-    <div class="al ali" style="margin-top:8px">Captain and Fruit duty are always assigned to different players. Rotation is automatic — least times = next up.</div>`;
+    <div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <button class="btn" onclick="rotateCapFruit()">🔄 Suggest rotation</button>
+      <span class="al ali" style="margin:0;flex:1;min-width:200px">Pick anyone — Captain and Fruit Duty can be the same player if you like.</span>
+    </div>`;
 }
 
 // ══════════════════════════════════════════
@@ -733,17 +1007,51 @@ function savePrefs(){sv();flash('prefSaved','✓ Saved!');renderAvail();}
 // ══════════════════════════════════════════
 // TEAM SHEET
 // ══════════════════════════════════════════
+// Preference-aware auto-assign. Three passes:
+//   1) Try each player's pos1 preference, sorted by fewest starts (then mins).
+//   2) Try each unfilled player's pos2 preference.
+//   3) Fill any remaining POS slots with leftover players in array order.
+// Within a pref bucket, the player with the fewest starts gets the first
+// matching slot — keeps minutes balanced.
 function autoAssign(){
-  const av=avail();S.assign={};
-  // Sort by fewest starts first (primary), then fewest mins (secondary)
-  const sorted=[...av].sort((a,b)=>{
+  const av=avail();
+  S.assign={};
+  const fairnessSort=(a,b)=>{
     const sd=S.st[a.id].starts-S.st[b.id].starts;
     if(sd!==0)return sd;
     return S.st[a.id].mins-S.st[b.id].mins;
-  });
-  sorted.slice(0,Math.min(12,sorted.length)).forEach((p,i)=>{
-    if(POS[i])S.assign[POS[i].n]=p.id;
-  });
+  };
+  const sorted=[...av].sort(fairnessSort);
+  const placed=new Set();
+
+  function tryPref(playerList,prefKey){
+    const stillUnplaced=[];
+    for(const p of playerList){
+      const pref=S.prefs[p.id]?.[prefKey]||'';
+      const slots=eligiblePosNs(pref);
+      const open=slots.find(n=>S.assign[n]===undefined);
+      if(open!==undefined){
+        S.assign[open]=p.id;
+        placed.add(p.id);
+      }else{
+        stillUnplaced.push(p);
+      }
+    }
+    return stillUnplaced;
+  }
+
+  // Pass 1: pos1
+  let remaining=tryPref(sorted,'pos1');
+  // Pass 2: pos2
+  remaining=tryPref(remaining,'pos2');
+  // Pass 3: fill leftover POS slots with leftover players in POS order.
+  for(const pos of POS){
+    if(S.assign[pos.n]!==undefined)continue;
+    if(!remaining.length)break;
+    const next=remaining.shift();
+    S.assign[pos.n]=next.id;
+    placed.add(next.id);
+  }
   sv();renderTeam();
 }
 
@@ -794,11 +1102,11 @@ function renderTeam(){
 }
 
 function renderField(){
-  const rows={backs:[11,12,13,14],halves:[9,10],locks:[4,5,8],front:[1,2,3]};
-  const lbl={backs:'Backs',halves:'Halves',locks:'Forwards',front:'Front Row'};
+  const rows={backs:[11,12,13,14],halves:[9,10],n8:[8],locks:[4,5],front:[1,2,3]};
+  const lbl={backs:'Backs',halves:'Halves',n8:'Number 8',locks:'Locks',front:'Front Row'};
   const pm={};POS.forEach(p=>pm[p.n]=p);
   let h='<div class="fv"><div class="fl">← ATTACK →</div>';
-  ['backs','halves','locks','front'].forEach(row=>{
+  ['backs','halves','n8','locks','front'].forEach(row=>{
     h+=`<div class="fl">${lbl[row]}</div><div class="fr">`;
     rows[row].forEach(n=>{
       const pid=S.assign[n];const p=pid?byId(pid):null;const isCap=pid&&pid===S.capId;
@@ -863,6 +1171,168 @@ function chgPos(n,v){
 // ══════════════════════════════════════════
 let swapPlans={h1:[],h2:[]};
 
+// Per-position-group rotation:
+//   Forwards rotate on a fwd-only cadence, backs on a back-only cadence,
+//   and the merged timeline is written into S.swaps. This guarantees every
+//   player gets a turn off the field as long as their group has any bench,
+//   and minimises minute-variance across the squad.
+function generateSwaps(){
+  const halfMin=Math.max(5,parseInt(document.getElementById('cfgHalfMin')?.value)||20);
+  const totalMin=halfMin*2;
+
+  const av=avail();
+  const startersIds=Object.values(S.assign).filter(Boolean);
+  if(startersIds.length<12){
+    flash('swapSaved','✗ Auto-Assign 12 starters first',4000);return;
+  }
+  const benchPlayers=av.filter(p=>!startersIds.includes(p.id));
+  const squadSize=startersIds.length+benchPlayers.length;
+
+  if(!benchPlayers.length){
+    swapPlans={h1:[],h2:[]};S.swaps={h1:[],h2:[]};
+    sv();renderSwapRows();
+    document.getElementById('swapPreview').textContent='No bench players — no swaps needed.';
+    return;
+  }
+
+  // Bucket starters by their POS slot's group; bench by pos1/pos2 pref,
+  // falling back to whichever group has fewer bench so far (keeps things even).
+  const groups={fwd:{starters:[],bench:[]},back:{starters:[],bench:[]}};
+  POS.forEach(pos=>{const pid=S.assign[pos.n];if(pid)groups[pos.grp].starters.push(pid);});
+  benchPlayers.forEach(p=>{
+    const pr=S.prefs[p.id]||{};
+    let g=posGrp(pr.pos1)||posGrp(pr.pos2);
+    if(g!=='fwd'&&g!=='back'){
+      g=groups.fwd.bench.length<=groups.back.bench.length?'fwd':'back';
+    }
+    groups[g].bench.push(p.id);
+  });
+
+  // Per-player "session minutes so far" + slot ledger that follows swap-ins.
+  const sessionMin={};av.forEach(p=>sessionMin[p.id]=0);
+  const slotOf={};
+  POS.forEach(pos=>{const pid=S.assign[pos.n];if(pid)slotOf[pid]=pos;});
+
+  // Compute per-group event timetable. Each group has its own cadence based
+  // on its own size and bench depth.
+  const eventTimes=[];   // [{time, group, info}]
+  const groupInfo={};
+  for(const g of ['fwd','back']){
+    const grp=groups[g];
+    const size=grp.starters.length+grp.bench.length;
+    const bSize=grp.bench.length;
+    if(bSize===0){groupInfo[g]={bench:0,events:0,times:[]};continue;}
+    const numShifts=Math.ceil(size/bSize);
+    const shiftMin=Math.max(4,Math.round(totalMin/numShifts));
+    const groupEvents=Math.max(0,numShifts-1);
+    const times=[];
+    for(let i=1;i<=groupEvents;i++){
+      let t=i*shiftMin;
+      if(Math.abs(t-halfMin)<=1)t=halfMin;
+      if(t>=totalMin)break;
+      times.push(t);
+      eventTimes.push({time:t,group:g});
+    }
+    groupInfo[g]={bench:bSize,events:times.length,times};
+  }
+  // Sort merged timeline; on tied minute, run backs before fwds (deterministic).
+  eventTimes.sort((a,b)=>a.time-b.time||(a.group==='back'?-1:1));
+
+  // Walk merged timeline, applying per-group rotation at each event.
+  const onField=new Set(startersIds);
+  const allPlan=[];                          // {absMin, inn, out}
+  const swappedOnce=new Set();               // starters already rotated once
+  let prevTime=0;
+  for(const ev of eventTimes){
+    const dt=ev.time-prevTime;
+    onField.forEach(id=>sessionMin[id]+=dt);
+    prevTime=ev.time;
+    const grp=groups[ev.group];
+
+    // Off cands: on-field players currently playing in this group's slot.
+    const offCands=[...onField].filter(id=>(slotOf[id]?.grp)===ev.group);
+    // On cands: this group's full pool minus whoever's currently on the field.
+    const groupPool=new Set([...grp.starters,...grp.bench]);
+    const onCands=[...groupPool].filter(id=>!onField.has(id));
+
+    offCands.sort((a,b)=>{
+      const aR=swappedOnce.has(a)?1:0,bR=swappedOnce.has(b)?1:0;
+      if(aR!==bR)return aR-bR;
+      return (S.st[b].mins+sessionMin[b])-(S.st[a].mins+sessionMin[a]);
+    });
+    onCands.sort((a,b)=>(S.st[a].mins+sessionMin[a])-(S.st[b].mins+sessionMin[b]));
+
+    const k=Math.min(grp.bench.length,offCands.length,onCands.length);
+    for(let i=0;i<k;i++){
+      const outId=offCands[i],innId=onCands[i];
+      allPlan.push({absMin:ev.time,inn:innId,out:outId});
+      if(slotOf[outId]){slotOf[innId]=slotOf[outId];delete slotOf[outId];}
+      onField.delete(outId);onField.add(innId);
+      swappedOnce.add(outId);
+    }
+  }
+  onField.forEach(id=>sessionMin[id]+=Math.max(0,totalMin-prevTime));
+
+  // Split into halves & write back.
+  const h1=[],h2=[];
+  for(const p of allPlan){
+    if(p.absMin<halfMin)h1.push({atMin:p.absMin,inn:p.inn,out:p.out});
+    else                 h2.push({atMin:p.absMin-halfMin,inn:p.inn,out:p.out});
+  }
+  swapPlans={h1,h2};
+  S.swaps={h1:[...h1],h2:[...h2]};
+  sv();renderSwapRows();
+
+  // Preview text + reflect dominant cadence in the cfgSwapMin display.
+  const fwdInfo=groupInfo.fwd.bench
+    ?`Fwd ${groupInfo.fwd.bench} bench · ${groupInfo.fwd.events} swap${groupInfo.fwd.events===1?'':'s'} at ${groupInfo.fwd.times.join('/')||'—'}'`
+    :'Fwd: no bench';
+  const backInfo=groupInfo.back.bench
+    ?`Back ${groupInfo.back.bench} bench · ${groupInfo.back.events} swap${groupInfo.back.events===1?'':'s'} at ${groupInfo.back.times.join('/')||'—'}'`
+    :'Back: no bench';
+  const eachMin=Math.round(totalMin*12/squadSize);
+  document.getElementById('swapPreview').textContent=
+    `${fwdInfo} · ${backInfo} · target ~${eachMin} min per player`;
+  const fwdShift=groupInfo.fwd.bench?Math.round(totalMin/Math.ceil((groups.fwd.starters.length+groups.fwd.bench.length)/groups.fwd.bench.length)):Infinity;
+  const backShift=groupInfo.back.bench?Math.round(totalMin/Math.ceil((groups.back.starters.length+groups.back.bench.length)/groups.back.bench.length)):Infinity;
+  const dominant=Math.min(fwdShift,backShift);
+  if(Number.isFinite(dominant))document.getElementById('cfgSwapMin').value=dominant;
+}
+
+// Compute and display projected minutes-per-player from the schedule.
+function updateSwapPreview(h1,h2,halfMin){
+  const el=document.getElementById('swapPreview');
+  if(!el)return;
+  if(!h1.length&&!h2.length){el.textContent='';return;}
+  const av=avail();
+  const startersIds=new Set(Object.values(S.assign).filter(Boolean));
+  const totalMin=(halfMin||20)*2;
+  const proj={};
+  av.forEach(p=>proj[p.id]=startersIds.has(p.id)?0:0);
+  // Walk per minute is overkill — track via the swap stream.
+  const onField=new Set(startersIds);
+  const halfPlans=[{plan:h1,offset:0,len:halfMin||20},{plan:h2,offset:halfMin||20,len:halfMin||20}];
+  let lastTime=0;
+  halfPlans.forEach(({plan,offset,len})=>{
+    let t=offset;
+    plan.forEach(sw=>{
+      const at=offset+(sw.atMin||0);
+      const dur=Math.max(0,at-t);
+      onField.forEach(id=>proj[id]=(proj[id]||0)+dur);
+      onField.delete(sw.out);onField.add(sw.inn);
+      t=at;
+    });
+    const dur=Math.max(0,offset+len-t);
+    onField.forEach(id=>proj[id]=(proj[id]||0)+dur);
+    lastTime=offset+len;
+  });
+  const lines=av
+    .map(p=>({p,m:proj[p.id]||0}))
+    .sort((a,b)=>b.m-a.m)
+    .map(x=>`${x.p.first.substring(0,1)}.${x.p.last.substring(0,1)}. ${x.m}'`);
+  el.textContent='Projected this game: '+lines.join(', ');
+}
+
 function buildSmartSwaps(bench,used){
   // Only rebuild if no swaps saved yet
   if(S.swaps.h1.length||S.swaps.h2.length){
@@ -908,31 +1378,48 @@ function buildSmartSwaps(bench,used){
 
 function renderSwapRows(){
   const av=avail();
+  const halfMin=parseInt(document.getElementById('cfgHalfMin')?.value)||20;
+  updateSwapPreview(swapPlans.h1||[],swapPlans.h2||[],halfMin);
+  const header=`<div class="swap-header">
+    <span class="col min">Min</span>
+    <span class="col">Off</span>
+    <span></span>
+    <span class="col">On</span>
+    <span></span>
+  </div>`;
   ['h1','h2'].forEach(h=>{
     const rows=swapPlans[h];
     const el=document.getElementById(h+'swaps');
     if(!el)return;
-    el.innerHTML=rows.map((sw,i)=>{
-      // Filter options by position compatibility if possible
+    const body=rows.map((sw,i)=>{
       const makeOpts=(selected)=>av.map(p=>{
         const sel=p.id===selected?'selected':'';
           const lbl=playerGrpLabel(p.id);const gTag=lbl?'['+lbl+']':'';
         return`<option value="${p.id}" ${sel}>${p.first} ${p.last} ${gTag}</option>`;
       }).join('');
+      const atMin=typeof sw.atMin==='number'?sw.atMin:10;
       return`<div class="swap-row">
-        <select class="swap-sel" onchange="updSwap('${h}',${i},'inn',this.value)">
-          <option value="">▲ On…</option>${makeOpts(sw.inn)}</select>
-        <div class="swap-arrow">⇄</div>
+        <input type="number" min="0" max="40" step="1" value="${atMin}"
+               title="Minutes into the half"
+               onchange="updSwap('${h}',${i},'atMin',this.value)"
+               style="width:48px;background:var(--C2);color:var(--T);border:1px solid var(--B);border-radius:4px;padding:4px 6px;text-align:center;font-weight:700">
         <select class="swap-sel" onchange="updSwap('${h}',${i},'out',this.value)">
           <option value="">▼ Off…</option>${makeOpts(sw.out)}</select>
+        <div class="swap-arrow">→</div>
+        <select class="swap-sel" onchange="updSwap('${h}',${i},'inn',this.value)">
+          <option value="">▲ On…</option>${makeOpts(sw.inn)}</select>
         <button class="del-btn" onclick="delSwap('${h}',${i})">✕</button>
       </div>`;
     }).join('');
+    el.innerHTML=(rows.length?header:'')+body;
   });
 }
-function updSwap(h,i,key,v){swapPlans[h][i][key]=parseInt(v)||''}
+function updSwap(h,i,key,v){
+  const num=parseInt(v);
+  swapPlans[h][i][key]=Number.isFinite(num)?num:'';
+}
 function delSwap(h,i){swapPlans[h].splice(i,1);renderSwapRows()}
-function addSwap(half){swapPlans['h'+half].push({inn:'',out:''});renderSwapRows()}
+function addSwap(half){swapPlans['h'+half].push({atMin:10,inn:'',out:''});renderSwapRows()}
 function saveSwaps(){S.swaps={h1:[...swapPlans.h1],h2:[...swapPlans.h2]};sv();flash('swapSaved','✓ Saved!')}
 
 // ══════════════════════════════════════════
@@ -1016,15 +1503,30 @@ function renderSwapDisplay(){
     const rows=window.gdSwaps[half];
     let h=`<div class="ix-half">
       <div class="ix-title">${hi===0?'1st Half':'2nd Half'} Subs</div>`;
+    if(rows.length){
+      h+=`<div class="swap-header">
+        <span class="col min">Min</span>
+        <span class="col">Off</span>
+        <span></span>
+        <span class="col">On</span>
+        <span></span>
+      </div>`;
+    }
     rows.forEach((sw,i)=>{
       const inSel=opts.replace(`value="${sw.inn}"`,`value="${sw.inn}" selected`);
       const outSel=opts.replace(`value="${sw.out}"`,`value="${sw.out}" selected`);
+      const atMin=typeof sw.atMin==='number'?sw.atMin:10;
+      const elapsed=hi===0?atMin:atMin+20;
       h+=`<div class="swap-row" style="margin-bottom:5px">
-        <select class="swap-sel" onchange="gdSwapUpd('${half}',${i},'inn',this.value)">
-          <option value="">▲ On…</option>${inSel}</select>
-        <div class="swap-arrow">⇄</div>
+        <input type="number" min="0" max="40" step="1" value="${atMin}"
+               title="Minutes into the half (clock ≈ ${elapsed}')"
+               onchange="gdSwapUpd('${half}',${i},'atMin',this.value)"
+               style="width:48px;background:var(--C2);color:var(--T);border:1px solid var(--B);border-radius:4px;padding:4px 6px;text-align:center;font-weight:700">
         <select class="swap-sel" onchange="gdSwapUpd('${half}',${i},'out',this.value)">
           <option value="">▼ Off…</option>${outSel}</select>
+        <div class="swap-arrow">→</div>
+        <select class="swap-sel" onchange="gdSwapUpd('${half}',${i},'inn',this.value)">
+          <option value="">▲ On…</option>${inSel}</select>
         <button class="del-btn" onclick="gdSwapDel('${half}',${i})">✕</button>
       </div>`;
     });
@@ -1039,7 +1541,8 @@ function renderSwapDisplay(){
 
 function gdSwapUpd(half,i,key,v){
   if(!window.gdSwaps)return;
-  window.gdSwaps[half][i][key]=parseInt(v)||'';
+  const num=parseInt(v);
+  window.gdSwaps[half][i][key]=Number.isFinite(num)?num:'';
   // Save back to S.swaps so it persists
   S.swaps={h1:[...window.gdSwaps.h1],h2:[...window.gdSwaps.h2]};sv();
 }
@@ -1051,22 +1554,33 @@ function gdSwapDel(half,i){
 }
 function gdSwapAdd(half){
   if(!window.gdSwaps)window.gdSwaps={h1:[],h2:[]};
-  window.gdSwaps[half].push({inn:'',out:''});
+  window.gdSwaps[half].push({atMin:10,inn:'',out:''});
   renderSwapDisplay();
 }
 
 function renderPlayerStats(){
   const av=avail();
-  const used=new Set(Object.values(S.assign));
+  // Map playerId -> POS object so we can show jersey number + abbreviation.
+  const playerToPos={};
+  POS.forEach(pos=>{const pid=S.assign[pos.n];if(pid)playerToPos[pid]=pos;});
+  // Starters sorted by jersey number; bench follows alphabetically.
   const sorted=[...av].sort((a,b)=>{
-    const as=used.has(a.id)?0:1,bs=used.has(b.id)?0:1;
-    return as-bs||a.first.localeCompare(b.first);
+    const aPos=playerToPos[a.id],bPos=playerToPos[b.id];
+    if(aPos&&bPos)return aPos.n-bPos.n;
+    if(aPos&&!bPos)return -1;
+    if(!aPos&&bPos)return 1;
+    return a.first.localeCompare(b.first);
   });
   let h='';
   sorted.forEach(p=>{
     const w=WK[p.id]||{tries:0,tackles:0,goals:0,yc:0,rc:0,mins:35};
-    const isSub=!used.has(p.id);
+    const pos=playerToPos[p.id];
+    const isSub=!pos;
+    const posChip=pos
+      ? `<span class="pos-chip">${pos.n} ${pos.ab}</span>`
+      : `<span class="pos-chip bench">BENCH</span>`;
     h+=`<div class="psr" style="${isSub?'opacity:.75;border-style:dashed':''}">
+      ${posChip}
       <div>
         <div class="psrn">${pn(p)}${p.id===S.capId?' ★':''}</div>
         <div class="psub2">${isSub?'Bench':'Starter'} · ${S.st[p.id].starts||0} starts · ${S.st[p.id].mins}m</div>
@@ -1436,10 +1950,204 @@ function genPDF(){
 // RESET
 // ══════════════════════════════════════════
 function confirmReset(){
-  if(confirm('⚠️ Delete ALL season data?')){
-    localStorage.removeItem(SK);
-    fetch(API_URL,{method:'DELETE'}).catch(()=>{}).finally(()=>{location.reload()});
+  if(!confirm('⚠️ Delete ALL season data?'))return;
+  localStorage.removeItem(SK);
+  (window.__sharkDB?window.__sharkDB.reset():Promise.resolve())
+    .catch(async err=>{
+      if(/permission-denied/.test(err&&(err.code||err.message||''))){
+        const ok=await enterCoachMode();
+        if(ok){return window.__sharkDB.reset()}
+      }
+      throw err;
+    })
+    .catch(e=>console.warn('[shark] reset failed',e))
+    .finally(()=>location.reload());
+}
+
+// Coach-mode prompt: ask for the team passphrase, send to Cloud Function, refresh token.
+async function enterCoachMode(){
+  if(!window.__sharkDB)return false;
+  try{
+    if(await window.__sharkDB.isCoach()){
+      setCoachStatus('✓ Coach mode active');
+      setBodyCoach(true);
+      return true;
+    }
+  }catch(_){}
+  const pass=prompt('Enter team passphrase to enable coach mode:');
+  if(!pass)return false;
+  try{
+    await window.__sharkDB.grantCoach(pass);
+    setCoachStatus('✓ Coach mode active');
+    setBodyCoach(true);
+    return true;
+  }catch(err){
+    setCoachStatus('✗ '+(err.message||'Wrong passphrase'));
+    return false;
   }
+}
+function setCoachStatus(msg){
+  const el=document.getElementById('coachStatus');
+  if(el)el.textContent=msg;
+}
+function setBodyCoach(b){
+  document.body.classList.toggle('coach-mode',!!b);
+}
+
+// ══════════════════════════════════════════
+// LIVE MATCH CLOCK + FIELD VIEW (Game Day)
+// ══════════════════════════════════════════
+function kickOff(){
+  if(!S.match)S.match={week:S.week,date:'',time:'',opp:'',ground:''};
+  S.match.kickoffTs=Date.now();
+  sv();renderLiveField();
+}
+function resetClock(){
+  if(S.match&&S.match.kickoffTs){delete S.match.kickoffTs;sv();}
+  const ov=document.getElementById('overrideMin');if(ov)ov.value='';
+  renderLiveField();
+}
+function currentMatchMin(){
+  const ov=document.getElementById('overrideMin');
+  if(ov&&ov.value!==''){const n=parseFloat(ov.value);if(Number.isFinite(n))return Math.max(0,n);}
+  const ts=S.match&&S.match.kickoffTs;
+  if(!ts)return 0;
+  const halfMin=parseInt(document.getElementById('cfgHalfMin')?.value)||20;
+  return Math.max(0,Math.min(2*halfMin,(Date.now()-ts)/60000));
+}
+// Walk the saved swap plan up to `curMin` and return the on-field map { posN -> playerId }.
+function currentOnField(curMin){
+  const halfMin=parseInt(document.getElementById('cfgHalfMin')?.value)||20;
+  const slots={};POS.forEach(pos=>{slots[pos.n]=S.assign[pos.n]||null;});
+  const apply=(rows,offsetMin)=>{
+    const sorted=[...(rows||[])]
+      .filter(r=>typeof r.atMin==='number'&&r.inn&&r.out)
+      .sort((a,b)=>a.atMin-b.atMin);
+    for(const r of sorted){
+      if(offsetMin+r.atMin>curMin)break;
+      // Find the POS slot currently held by `out` and replace with `inn`.
+      for(const pos of POS){
+        if(slots[pos.n]===r.out){slots[pos.n]=r.inn;break;}
+      }
+    }
+  };
+  apply(S.swaps&&S.swaps.h1,0);
+  if(curMin>=halfMin)apply(S.swaps&&S.swaps.h2,halfMin);
+  return slots;
+}
+function renderLiveField(){
+  const card=document.getElementById('liveField');
+  if(!card)return;
+  const halfMin=parseInt(document.getElementById('cfgHalfMin')?.value)||20;
+  const totalMin=halfMin*2;
+  const curMin=currentMatchMin();
+  // Clock label.
+  const clockEl=document.getElementById('liveClock');
+  if(clockEl){
+    if(!S.match||!S.match.kickoffTs){
+      clockEl.textContent=document.getElementById('overrideMin')?.value?
+        `OVR · ${Math.round(curMin)}'`:'— not started —';
+    }else{
+      const half=curMin<halfMin?'H1':'H2';
+      const inHalf=curMin<halfMin?curMin:curMin-halfMin;
+      const m=Math.floor(inHalf);
+      const s=Math.floor((inHalf-m)*60).toString().padStart(2,'0');
+      clockEl.textContent=`${half} · ${m}'${s}"`;
+    }
+  }
+  // Field formation using same row layout as renderField().
+  const slots=currentOnField(curMin);
+  const rows={backs:[11,12,13,14],halves:[9,10],n8:[8],locks:[4,5],front:[1,2,3]};
+  const lbl ={backs:'Backs',halves:'Halves',n8:'Number 8',locks:'Locks',front:'Front Row'};
+  const pm={};POS.forEach(p=>pm[p.n]=p);
+  let h='<div class="fv"><div class="fl">← ATTACK →</div>';
+  ['backs','halves','n8','locks','front'].forEach(row=>{
+    h+=`<div class="fl">${lbl[row]}</div><div class="fr">`;
+    rows[row].forEach(n=>{
+      const pid=slots[n];const p=pid?byId(pid):null;const isCap=pid&&pid===S.capId;
+      h+=`<div class="fp${isCap?' cap':''}">
+        ${isCap?'<div class="cbadge">★ CAP</div>':''}
+        <div class="pnum">${n}</div><div class="pabt">${pm[n]?.ab||''}</div>
+        <div class="pnam">${p?p.first:'—'}</div></div>`;
+    });h+='</div>';
+  });h+='</div>';
+  card.innerHTML=h;
+  // "Next swap" hint.
+  const hint=document.getElementById('nextSwapHint');
+  if(hint){
+    const upcoming=[];
+    (S.swaps&&S.swaps.h1||[]).forEach(r=>{if(r.atMin>curMin)upcoming.push({abs:r.atMin,r});});
+    (S.swaps&&S.swaps.h2||[]).forEach(r=>{const a=r.atMin+halfMin;if(a>curMin)upcoming.push({abs:a,r});});
+    upcoming.sort((a,b)=>a.abs-b.abs);
+    if(upcoming.length){
+      const u=upcoming[0];
+      const inP=byId(u.r.inn);const outP=byId(u.r.out);
+      const dt=u.abs-curMin;
+      const m=Math.floor(dt);const s=Math.floor((dt-m)*60).toString().padStart(2,'0');
+      hint.textContent=`Next swap @ ${u.abs}' (in ${m}'${s}") — ${outP?outP.first:'?'} → ${inP?inP.first:'?'}`;
+    }else if(curMin>=totalMin){
+      hint.textContent='Full time.';
+    }else{
+      hint.textContent='No further swaps planned.';
+    }
+  }
+}
+
+// ══════════════════════════════════════════
+// MANUAL SAVE / PULL / SAFETY NETS
+// ══════════════════════════════════════════
+
+// Push the current local state to Firestore. Prompts for coach mode if needed.
+async function saveNow(){
+  if(!window.__sharkDB)return;
+  if(!(await window.__sharkDB.isCoach())){
+    const ok=await enterCoachMode();
+    if(!ok)return;
+  }
+  const snapshot=JSON.parse(JSON.stringify(S));
+  try{
+    await window.__sharkDB.save(snapshot);
+    setDirty(false);
+    const t=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    flash('dirtyPill','✓ Saved @ '+t,4000);
+  }catch(err){
+    if(/permission-denied/.test(err&&(err.code||err.message||''))){
+      const ok=await enterCoachMode();
+      if(ok)return saveNow();
+    }
+    flash('dirtyPill','✗ Save failed',4000);
+    console.warn('[shark] save failed',err);
+  }
+}
+
+// Merge the most recent remote snapshot we held back while the coach was editing.
+function pullLatest(){
+  if(!pendingRemote){
+    document.getElementById('incomingPill').style.display='none';
+    return;
+  }
+  if(dirty&&!confirm('Discard your unsaved local changes and load the cloud version?'))return;
+  S=migrate(pendingRemote.state);
+  try{localStorage.setItem(SK,JSON.stringify(S))}catch(_){}
+  pendingRemote=null;
+  document.getElementById('incomingPill').style.display='none';
+  setDirty(false);
+  initWK();renderAll();
+}
+
+// Background safety save every 10 minutes if there are unsaved changes.
+async function safetySave(){
+  if(!dirty)return;
+  if(!window.__sharkDB||!(await window.__sharkDB.isCoach()))return;
+  return saveNow();
+}
+
+// Browser-level prompt before the user accidentally closes the tab with unsaved work.
+function warnIfDirty(e){
+  if(!dirty)return;
+  e.preventDefault();
+  e.returnValue='You have unsaved changes — leave anyway?';
+  return e.returnValue;
 }
 
 // ══════════════════════════════════════════
@@ -1458,23 +2166,77 @@ function renderAll(){
 }
 async function init(){
   renderAll();
+  if(!window.__sharkDB){
+    // Module still booting — wait once.
+    await new Promise(r=>window.addEventListener('shark-db-ready',r,{once:true}));
+  }
+  // Reflect coach status in the toolbar (silent — no prompt on init).
+  let isCoachOnInit=false;
+  try{isCoachOnInit=await window.__sharkDB.isCoach()}catch(_){}
+  setBodyCoach(isCoachOnInit);
+  if(isCoachOnInit)setCoachStatus('✓ Coach mode active');
+  // Non-coaches must not land on the Setup tab — switch to Team.
+  if(!isCoachOnInit){
+    const setupTab=document.querySelector('.tab.active.coach-only');
+    const setupPanel=document.getElementById('panel-setup');
+    if(setupTab)setupTab.classList.remove('active');
+    if(setupPanel)setupPanel.classList.remove('active');
+    const teamTab=document.querySelector(".tab[onclick=\"ST('teamsheet',this)\"]");
+    const teamPanel=document.getElementById('panel-teamsheet');
+    if(teamTab)teamTab.classList.add('active');
+    if(teamPanel)teamPanel.classList.add('active');
+  }
   try{
-    const res=await fetch(API_URL);
-    if(!res.ok)throw new Error('Server error');
-    const serverData=await res.json();
+    const serverData=await window.__sharkDB.load();
     const serverEmpty=!serverData||Object.keys(serverData).length===0;
     const localRaw=localStorage.getItem(SK);
     if(!serverEmpty){
-      // Server is source of truth — override cache
       S=migrate(serverData);
       try{localStorage.setItem(SK,JSON.stringify(S))}catch(e){}
       initWK();renderAll();
     }else if(localRaw){
-      // First-time migration: promote localStorage to server
       sv();
     }
-    // Both empty → stay in blank state
-  }catch(e){/* server unavailable — localStorage cache continues as-is */}
+  }catch(e){/* offline — localStorage cache continues as-is */}
+
+  // Live sync. Two modes:
+  //   • Viewer (no coach claim, no local edits): merge remote into S immediately.
+  //   • Coach with unsaved local edits: hold the remote snapshot in pendingRemote
+  //     and surface an "🔄 Newer cloud version" pill so the coach can decide
+  //     whether to discard their work and pull, or save first (which will then
+  //     bump _version past whatever just arrived).
+  window.__sharkDB.subscribe(async (remoteState,meta)=>{
+    if(!meta||!meta.remote)return;
+    if(!remoteState||Object.keys(remoteState).length===0)return;
+    let coachActive=false;
+    try{coachActive=await window.__sharkDB.isCoach()}catch(_){}
+    if(coachActive&&dirty){
+      pendingRemote={state:remoteState,meta};
+      const pill=document.getElementById('incomingPill');
+      if(pill){
+        const t=meta.updatedAt?meta.updatedAt.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}):'';
+        pill.textContent='🔄 Newer cloud version'+(t?' @ '+t:'')+' — click to merge';
+        pill.style.display='inline';
+      }
+      return;
+    }
+    S=migrate(remoteState);
+    try{localStorage.setItem(SK,JSON.stringify(S))}catch(_){}
+    setDirty(false);
+    initWK();renderAll();
+    if(meta.updatedAt){
+      const t=meta.updatedAt.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+      setCoachStatus('Synced @ '+t);
+    }
+  });
+
+  // Safety nets: 10-min auto-save + beforeunload guard.
+  setInterval(safetySave,10*60*1000);
+  window.addEventListener('beforeunload',warnIfDirty);
+
+  // Live field ticker: refresh the "Field Right Now" card every 5s.
+  renderLiveField();
+  setInterval(renderLiveField,5000);
 }
 init();
 </script>
