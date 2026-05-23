@@ -191,6 +191,16 @@ details:not([open]) summary.card-title::after{transform:rotate(-90deg)}
 .bpdf{background:linear-gradient(135deg,#c0392b,#922b21);color:#fff;border:1px solid var(--RE)}.bpdf:hover{opacity:.85}
 .bdanger{background:rgba(231,76,60,.12);color:var(--RE);border:1px solid var(--RE)}
 
+/* HISTORY EDIT MODAL */
+.he-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:500;
+  align-items:flex-start;justify-content:center;padding:24px 12px;overflow-y:auto}
+.he-card{background:var(--C);border:1px solid var(--B);border-radius:8px;padding:18px;
+  max-width:680px;width:100%;box-shadow:0 16px 48px rgba(0,0,0,.6)}
+#he_statsTbl th{padding:5px 6px;font-size:10px;letter-spacing:.06em}
+#he_statsTbl td{padding:3px 4px;border-bottom:1px solid var(--B)}
+#he_statsTbl input[type=number]{background:var(--D);color:var(--T);border:1px solid var(--B);
+  border-radius:3px;padding:3px 5px;font-size:11px;font-family:'Barlow',sans-serif}
+
 /* ALERTS */
 .al{padding:8px 11px;border-radius:5px;margin-bottom:8px;font-size:11px;border-left:4px solid}
 .ali{background:rgba(52,152,219,.1);border-color:var(--BL)}
@@ -663,7 +673,8 @@ const PLAYERS=[
   {id:17,first:'Roux',    last:'Joubert'},
   {id:18,first:'Harvey',  last:'Mckeown'},
   {id:19,first:'Mickey',    last:'Purcell'},
-  {id:20,first:'Charlie',  last:'Hastings'}
+  {id:20,first:'Charlie',  last:'Hastings'},
+  {id:21,first:'Alfie',  last:'Lossberg'}
 ];
 
 // Named positions
@@ -763,6 +774,8 @@ function load(){
 // listener used to clobber in-flight UI state.
 let dirty=false;                     // true when localStorage is ahead of cloud
 let pendingRemote=null;              // remote state held back while user is editing
+let autoSaveTimer=null;              // debounced cloud-save timer
+const AUTO_SAVE_DELAY_MS=10000;      // push to Firestore 10s after last edit
 function setDirty(b){
   dirty=!!b;
   const el=document.getElementById('dirtyPill');
@@ -771,6 +784,7 @@ function setDirty(b){
 function sv(){
   try{localStorage.setItem(SK,JSON.stringify(S))}catch(e){}
   setDirty(true);
+  scheduleAutoSave();
 }
 
 let S=load();
@@ -1681,13 +1695,23 @@ function saveGame(){
   if(S.capId)S.st[S.capId].caps++;
   if(S.fruitId)S.st[S.fruitId].fruit++;
 
+  const stats={};
+  av.forEach(p=>{
+    const w=WK[p.id]||{};
+    stats[p.id]={
+      tries:w.tries||0,tackles:w.tackles||0,goals:w.goals||0,
+      yc:w.yc||0,rc:w.rc||0,mins:w.mins||0,
+      started:used.has(p.id)
+    };
+  });
   S.hist.push({
     week:wk,date:S.match.date,time:S.match.time,
     opp:S.match.opp||'Unknown',ground:S.match.ground,
     capId:S.capId,fruitId:S.fruitId,momId,tpId,
     players:av.map(p=>p.id),
     ourTries:calcOurTries(),ourGoals:calcOurGoals(),ourScore:calcOurScore(),
-    oppTries:S.opp.tries,oppGoals:S.opp.goals,oppScore:calcOppScore()
+    oppTries:S.opp.tries,oppGoals:S.opp.goals,oppScore:calcOppScore(),
+    stats
   });
 
   // Reset
@@ -1791,7 +1815,7 @@ function renderSeason(){
 function renderHistory(){
   const el=document.getElementById('histList');
   if(!S.hist.length){el.innerHTML='<p class="tmu">No games saved yet.</p>';return}
-  el.innerHTML=[...S.hist].reverse().map(h=>{
+  el.innerHTML=S.hist.map((h,idx)=>({h,idx})).reverse().map(({h,idx})=>{
     const cap=h.capId?byId(h.capId):null;const mom=h.momId?byId(h.momId):null;
     const tp=h.tpId?byId(h.tpId):null;const fr=h.fruitId?byId(h.fruitId):null;
     const res=h.ourScore>h.oppScore?'<span style="color:var(--GR);font-weight:700">WIN</span>':
@@ -1812,9 +1836,180 @@ function renderHistory(){
           Tm Ply: <strong style="color:var(--T)">${tp?pn(tp):'—'}</strong> ·
           Fruit: <strong style="color:var(--T)">${fr?pn(fr):'—'}</strong>
         </div>
+        <div class="coach-only" style="margin-top:6px;display:flex;gap:6px">
+          <button class="btn bprim" style="padding:4px 9px;font-size:11px" onclick="editHistGame(${idx})">✏️ Edit</button>
+          <button class="btn bdanger" style="padding:4px 9px;font-size:11px" onclick="deleteHistGame(${idx})">🗑️ Delete</button>
+        </div>
       </div>
     </div>`;
   }).join('');
+}
+
+// ── Historic game edit / delete ──────────────────────────
+function editHistGame(idx){
+  const h=S.hist[idx];if(!h)return;
+  const modal=document.getElementById('histEditModal');
+  const body=document.getElementById('histEditBody');
+  const players=(h.players||[]).map(pid=>byId(pid)).filter(Boolean);
+  const roleOpts=['<option value="">— None —</option>'].concat(
+    players.map(p=>`<option value="${p.id}">${pn(p)}</option>`)
+  ).join('');
+  const sel=(name,val)=>roleOpts.replace(`value="${val}"`,`value="${val}" selected`);
+  const hasStats=h.stats&&Object.keys(h.stats).length>0;
+  const statsRows=hasStats?players.map(p=>{
+    const w=h.stats[p.id]||{tries:0,tackles:0,goals:0,yc:0,rc:0,mins:0,started:false};
+    return`<tr>
+      <td style="padding:4px 6px;font-size:12px">${pn(p)}</td>
+      <td><input type="number" min="0" data-pid="${p.id}" data-key="tries"   value="${w.tries||0}"   style="width:50px"></td>
+      <td><input type="number" min="0" data-pid="${p.id}" data-key="tackles" value="${w.tackles||0}" style="width:50px"></td>
+      <td><input type="number" min="0" data-pid="${p.id}" data-key="goals"   value="${w.goals||0}"   style="width:50px"></td>
+      <td><input type="number" min="0" max="40" data-pid="${p.id}" data-key="mins" value="${w.mins||0}" style="width:50px"></td>
+      <td><input type="number" min="0" data-pid="${p.id}" data-key="yc"      value="${w.yc||0}"      style="width:42px"></td>
+      <td><input type="number" min="0" data-pid="${p.id}" data-key="rc"      value="${w.rc||0}"      style="width:42px"></td>
+      <td style="text-align:center"><input type="checkbox" data-pid="${p.id}" data-key="started" ${w.started?'checked':''}></td>
+    </tr>`;
+  }).join(''):'';
+  body.innerHTML=`
+    <h3 style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:18px;color:var(--G);margin-bottom:10px">Edit game · vs ${h.opp||'?'}</h3>
+    <div class="fg ff">
+      <div><label>Week</label><input id="he_week"  type="number" value="${h.week||''}"></div>
+      <div><label>Date</label><input id="he_date"  type="date"   value="${h.date||''}"></div>
+      <div><label>Kick-off</label><input id="he_time" type="time" value="${h.time||''}"></div>
+      <div><label>Opponent</label><input id="he_opp" type="text" value="${(h.opp||'').replace(/"/g,'&quot;')}"></div>
+      <div style="grid-column:1/-1"><label>Ground</label><input id="he_ground" type="text" value="${(h.ground||'').replace(/"/g,'&quot;')}"></div>
+    </div>
+    <div class="fg ff">
+      <div><label>Our tries</label><input id="he_otries" type="number" min="0" value="${h.ourTries||0}"></div>
+      <div><label>Our goals</label><input id="he_ogoals" type="number" min="0" value="${h.ourGoals||0}"></div>
+      <div><label>Opp tries</label><input id="he_ptries" type="number" min="0" value="${h.oppTries||0}"></div>
+      <div><label>Opp goals</label><input id="he_pgoals" type="number" min="0" value="${h.oppGoals||0}"></div>
+    </div>
+    <div class="fg ff">
+      <div><label>Captain</label><select id="he_cap">${sel('he_cap',h.capId)}</select></div>
+      <div><label>Fruit duty</label><select id="he_fruit">${sel('he_fruit',h.fruitId)}</select></div>
+      <div><label>Man of Match</label><select id="he_mom">${sel('he_mom',h.momId)}</select></div>
+      <div><label>Team Player</label><select id="he_tp">${sel('he_tp',h.tpId)}</select></div>
+    </div>
+    ${hasStats?`
+      <div style="margin:10px 0 4px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;color:var(--G)">Per-player stats</div>
+      <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px" id="he_statsTbl">
+        <thead><tr style="background:var(--M);color:var(--G);font-family:'Barlow Condensed',sans-serif">
+          <th style="padding:5px 6px;text-align:left">Player</th><th>Tries</th><th>Tackles</th><th>Goals</th><th>Mins</th><th>YC</th><th>RC</th><th>Start</th>
+        </tr></thead>
+        <tbody>${statsRows}</tbody>
+      </table></div>
+    `:'<div class="al alw" style="margin-top:10px">Per-player stats weren\'t recorded for older games. Metadata, scores, and roles are still editable.</div>'}
+    <div style="display:flex;gap:8px;margin-top:14px;justify-content:flex-end">
+      <button class="btn" onclick="closeHistEdit()">Cancel</button>
+      <button class="btn bgold" onclick="commitHistEdit(${idx})">💾 Save changes</button>
+    </div>
+  `;
+  modal.style.display='flex';
+  // Pre-select role values (selectedness via attribute didn't survive replace edge cases)
+  ['he_cap','he_fruit','he_mom','he_tp'].forEach((id,i)=>{
+    const v=[h.capId,h.fruitId,h.momId,h.tpId][i];
+    const elx=document.getElementById(id);if(elx)elx.value=v||'';
+  });
+}
+
+function closeHistEdit(){
+  const modal=document.getElementById('histEditModal');if(modal)modal.style.display='none';
+}
+
+function reverseHistContributions(h){
+  if(h.capId   && S.st[h.capId])   S.st[h.capId].caps  = Math.max(0,(S.st[h.capId].caps||0)  -1);
+  if(h.fruitId && S.st[h.fruitId]) S.st[h.fruitId].fruit=Math.max(0,(S.st[h.fruitId].fruit||0)-1);
+  if(h.momId   && S.st[h.momId])   S.st[h.momId].motm  = Math.max(0,(S.st[h.momId].motm||0)  -1);
+  if(h.tpId    && S.st[h.tpId])    S.st[h.tpId].tp     = Math.max(0,(S.st[h.tpId].tp||0)     -1);
+  if(h.stats){
+    for(const pid in h.stats){
+      const w=h.stats[pid],s=S.st[pid];if(!s)continue;
+      s.games  =Math.max(0,(s.games||0)  -1);
+      if(w.started)s.starts=Math.max(0,(s.starts||0)-1);
+      s.tries  =Math.max(0,(s.tries||0)  -(w.tries  ||0));
+      s.tackles=Math.max(0,(s.tackles||0)-(w.tackles||0));
+      s.yc     =Math.max(0,(s.yc||0)     -(w.yc     ||0));
+      s.rc     =Math.max(0,(s.rc||0)     -(w.rc     ||0));
+      s.mins   =Math.max(0,(s.mins||0)   -(w.mins   ||0));
+    }
+  }
+}
+
+function applyHistContributions(h){
+  if(h.capId   && S.st[h.capId])   S.st[h.capId].caps  = (S.st[h.capId].caps||0)  +1;
+  if(h.fruitId && S.st[h.fruitId]) S.st[h.fruitId].fruit=(S.st[h.fruitId].fruit||0)+1;
+  if(h.momId   && S.st[h.momId])   S.st[h.momId].motm  = (S.st[h.momId].motm||0)  +1;
+  if(h.tpId    && S.st[h.tpId])    S.st[h.tpId].tp     = (S.st[h.tpId].tp||0)     +1;
+  if(h.stats){
+    for(const pid in h.stats){
+      const w=h.stats[pid],s=S.st[pid];if(!s)continue;
+      s.games  =(s.games||0)  +1;
+      if(w.started)s.starts=(s.starts||0)+1;
+      s.tries  =(s.tries||0)  +(w.tries  ||0);
+      s.tackles=(s.tackles||0)+(w.tackles||0);
+      s.yc     =(s.yc||0)     +(w.yc     ||0);
+      s.rc     =(s.rc||0)     +(w.rc     ||0);
+      s.mins   =(s.mins||0)   +(w.mins   ||0);
+    }
+  }
+}
+
+function commitHistEdit(idx){
+  const old=S.hist[idx];if(!old)return;
+  const get=id=>document.getElementById(id);
+  const numOr=(id,d)=>{const v=parseInt(get(id).value);return isNaN(v)?d:v;};
+  const idOr=id=>{const v=parseInt(get(id).value);return isNaN(v)?null:v;};
+  const edits={
+    week:numOr('he_week',old.week),
+    date:get('he_date').value||'',
+    time:get('he_time').value||'',
+    opp:get('he_opp').value||'Unknown',
+    ground:get('he_ground').value||'',
+    ourTries:Math.max(0,numOr('he_otries',0)),
+    ourGoals:Math.max(0,numOr('he_ogoals',0)),
+    oppTries:Math.max(0,numOr('he_ptries',0)),
+    oppGoals:Math.max(0,numOr('he_pgoals',0)),
+    capId:idOr('he_cap'),fruitId:idOr('he_fruit'),
+    momId:idOr('he_mom'),tpId:idOr('he_tp'),
+  };
+  edits.ourScore=edits.ourTries*5+edits.ourGoals*2;
+  edits.oppScore=edits.oppTries*5+edits.oppGoals*2;
+  // Captain and fruit duty must differ if both set (matches live game rule)
+  if(edits.capId&&edits.fruitId&&edits.capId===edits.fruitId){
+    alert('Captain and fruit duty must be different players.');return;
+  }
+  // Per-player stats (only if the original had them)
+  if(old.stats){
+    const newStats={};
+    document.querySelectorAll('#he_statsTbl input[data-pid]').forEach(inp=>{
+      const pid=parseInt(inp.dataset.pid),key=inp.dataset.key;
+      if(!newStats[pid])newStats[pid]={tries:0,tackles:0,goals:0,yc:0,rc:0,mins:0,started:false};
+      if(key==='started')newStats[pid].started=inp.checked;
+      else newStats[pid][key]=Math.max(0,parseInt(inp.value)||0);
+    });
+    edits.stats=newStats;
+  }else{
+    edits.stats=old.stats; // preserve absence
+  }
+  reverseHistContributions(old);
+  applyHistContributions(edits);
+  S.hist[idx]={...old,...edits};
+  sv();
+  closeHistEdit();
+  renderHistory();
+  if(document.getElementById('panel-season').classList.contains('active'))renderSeason();
+  flash('dirtyPill','✓ Game updated',2500);
+}
+
+function deleteHistGame(idx){
+  const h=S.hist[idx];if(!h)return;
+  if(!confirm(`Delete the game vs ${h.opp||'?'} (week ${h.week})? This cannot be undone.`))return;
+  reverseHistContributions(h);
+  S.hist.splice(idx,1);
+  sv();
+  renderHistory();
+  if(document.getElementById('panel-season').classList.contains('active'))renderSeason();
+  flash('dirtyPill','✓ Game deleted',2500);
 }
 
 // ══════════════════════════════════════════
@@ -2108,6 +2303,7 @@ async function saveNow(){
   try{
     await window.__sharkDB.save(snapshot);
     setDirty(false);
+    if(autoSaveTimer){clearTimeout(autoSaveTimer);autoSaveTimer=null;}
     const t=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
     flash('dirtyPill','✓ Saved @ '+t,4000);
   }catch(err){
@@ -2140,6 +2336,22 @@ async function safetySave(){
   if(!dirty)return;
   if(!window.__sharkDB||!(await window.__sharkDB.isCoach()))return;
   return saveNow();
+}
+
+// Debounced cloud push. Called from sv() on every mutation. Coalesces
+// rapid +/- taps into a single Firestore write 10s after the last edit.
+// Silent for viewers; failure leaves dirty=true so the next edit retries.
+function scheduleAutoSave(){
+  if(autoSaveTimer)clearTimeout(autoSaveTimer);
+  autoSaveTimer=setTimeout(async()=>{
+    autoSaveTimer=null;
+    if(!dirty)return;
+    if(!window.__sharkDB)return;
+    try{
+      if(!(await window.__sharkDB.isCoach()))return;
+      await saveNow();
+    }catch(_){/* keep dirty so next edit retries */}
+  },AUTO_SAVE_DELAY_MS);
 }
 
 // Browser-level prompt before the user accidentally closes the tab with unsaved work.
@@ -2240,5 +2452,10 @@ async function init(){
 }
 init();
 </script>
+<div id="histEditModal" class="he-modal">
+  <div class="he-card">
+    <div id="histEditBody"></div>
+  </div>
+</div>
 </body>
 </html>
